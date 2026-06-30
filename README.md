@@ -1,0 +1,80 @@
+# Prep Tracker
+
+A personal, single-user platform for tracking six months of interview preparation. This
+repository is also a flagship engineering project: it is built to demonstrate
+production-grade practices (clean structure, tests, security-by-default, serverless-aware
+architecture) to a reviewer.
+
+This first slice — the **Foundation Shell** — delivers a secure, navigable, deployable
+shell: sign in, see a persistent navigation layout (Dashboard, Daily Log, DSA, Weekly
+Review), stay signed in across reloads, and sign out. Tracker features come in later slices.
+
+## Tech stack
+
+- **Next.js** (App Router) + **React**, **TypeScript** (strict mode)
+- **MongoDB Atlas** via **Mongoose** (serverless-safe cached connection)
+- **Tailwind CSS** for the UI
+- **Vercel** for serverless deployment
+- **Vitest** + **mongodb-memory-server** for tests
+- Custom single-user auth: scrypt-hashed credentials, server-side sessions, HMAC-keyed
+  session tokens in an httpOnly cookie
+
+## Project structure
+
+```text
+app/            Routes + API route handlers (app/api/auth/*)
+  (app)/        Authenticated route group (server-side guarded) + placeholder pages
+  signin/       Public sign-in page
+components/     Reusable UI (AppShell, Sidebar, SignInForm)
+lib/            Shared logic (db connection, auth, rate limiting, env, http helpers)
+models/         Mongoose schemas (User, Session, LoginAttempt)
+types/          Shared TypeScript types
+middleware.ts   Edge cookie-presence redirect for protected pages
+scripts/        One-off scripts (seed the single owner)
+tests/          Unit + integration tests
+```
+
+## Environment variables
+
+Copy [.env.example](.env.example) to `.env.local` and fill in:
+
+| Variable         | Description                                                                    |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `MONGODB_URI`    | MongoDB Atlas connection string                                                |
+| `AUTH_SECRET`    | Random secret; HMAC key for hashing session tokens (`openssl rand -base64 32`) |
+| `OWNER_USERNAME` | Owner username (seed only)                                                     |
+| `OWNER_EMAIL`    | Owner email (seed only)                                                        |
+| `OWNER_PASSWORD` | Owner password (seed only)                                                     |
+
+Secrets are never committed; `.env*` files are git-ignored.
+
+## Local setup
+
+```bash
+npm install
+cp .env.example .env.local   # then fill in values
+npm run seed                 # provision the single owner (run once)
+npm run dev                  # http://localhost:3000
+```
+
+## Running tests
+
+```bash
+npm test          # Vitest: unit + integration (in-memory MongoDB, no network)
+npm run lint      # ESLint
+npm run format    # Prettier
+npm run typecheck # tsc --noEmit (strict)
+```
+
+## Deploying to Vercel
+
+1. Import the repository into Vercel.
+2. Add Environment Variables in the Vercel project: `MONGODB_URI`, `AUTH_SECRET`.
+3. Provision the owner against the production database once (run `npm run seed` locally
+   with `MONGODB_URI` pointed at the production cluster, plus the `OWNER_*` variables).
+4. Deploy, open the hosted URL, and you will land on the sign-in page.
+
+## Validation
+
+See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md)
+for end-to-end validation scenarios mapped to the feature's acceptance criteria.
