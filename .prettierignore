@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+package-lock.json
+*.log
+
+# Spec-kit artifacts (managed by the spec workflow, not app code)
+specs/
+.specify/
+.github/
