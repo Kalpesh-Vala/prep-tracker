@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { type NextRequest } from 'next/server';
 import { dbConnect } from './db';
 import { getEnv, isProduction } from './env';
 import { SESSION_COOKIE } from './constants';
@@ -85,9 +86,16 @@ export async function getSessionUser(token: string | undefined): Promise<Session
   return user ? toSessionUser(user) : null;
 }
 
+/**
+ * Resolve the authenticated owner for an API request from its session cookie.
+ * Returns null when there is no valid session, so route handlers can reply 401.
+ */
+export async function requireApiUser(req: NextRequest): Promise<SessionUser | null> {
+  return getSessionUser(req.cookies.get(SESSION_COOKIE)?.value);
+}
+
 /** Invalidate (delete) the session for a token. Idempotent. */
-export async function destroySession(token: string | undefined): Promise<void> {
-  if (!token) {
+export async function destroySession(token: string | undefined): Promise<void> {  if (!token) {
     return;
   }
   await dbConnect();

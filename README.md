@@ -27,7 +27,7 @@ app/            Routes + API route handlers (app/api/auth/*)
   signin/       Public sign-in page
 components/     Reusable UI (AppShell, Sidebar, SignInForm)
 lib/            Shared logic (db connection, auth, rate limiting, env, http helpers)
-models/         Mongoose schemas (User, Session, LoginAttempt)
+models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog)
 types/          Shared TypeScript types
 middleware.ts   Edge cookie-presence redirect for protected pages
 scripts/        One-off scripts (seed the single owner)
@@ -66,6 +66,32 @@ npm run format    # Prettier
 npm run typecheck # tsc --noEmit (strict)
 ```
 
+## Daily Log feature
+
+The **Daily Log** is the first tracker slice. It captures one entry per calendar day —
+enforced by a unique index on a normalized (midnight-UTC) date, so a day can never be
+duplicated and past entries are never overwritten or silently lost.
+
+Each entry records: date, study hours (0–24, at most one decimal), a learning summary,
+DSA problems solved, whether revision was completed, the biggest challenge, the next-day
+goal, and an optional energy level (`low` / `medium` / `high`). Entries are created for
+today (or a backfilled past date — future dates are rejected), viewed individually, edited
+in place (the date is immutable), and browsed newest-first.
+
+### Endpoints (`app/api/daily-log`)
+
+| Method & path              | Purpose                                    | Success |
+| -------------------------- | ------------------------------------------ | ------- |
+| `POST /api/daily-log`      | Create today's / a backfilled entry        | `201`   |
+| `GET /api/daily-log`       | List entries newest-first (paginated)      | `200`   |
+| `GET /api/daily-log/:id`   | Fetch a single entry                       | `200`   |
+| `PATCH /api/daily-log/:id` | Update an entry in place (date immutable)  | `200`   |
+
+All endpoints require a valid session and use the shared `{ data }` / `{ error }` envelope.
+Server-side validation rejects invalid input with `400`; a duplicate date returns
+`409 DUPLICATE_DATE`. See
+[specs/002-daily-log/contracts/daily-log-api.md](specs/002-daily-log/contracts/daily-log-api.md).
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel.
@@ -77,4 +103,5 @@ npm run typecheck # tsc --noEmit (strict)
 ## Validation
 
 See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md)
-for end-to-end validation scenarios mapped to the feature's acceptance criteria.
+and [specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md) for end-to-end
+validation scenarios mapped to each feature's acceptance criteria.
