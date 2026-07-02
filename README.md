@@ -27,7 +27,7 @@ app/            Routes + API route handlers (app/api/auth/*)
   signin/       Public sign-in page
 components/     Reusable UI (AppShell, Sidebar, SignInForm)
 lib/            Shared logic (db connection, auth, rate limiting, env, http helpers)
-models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog, DsaProblem)
+models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog, DsaProblem, WeeklyReview)
 types/          Shared TypeScript types
 middleware.ts   Edge cookie-presence redirect for protected pages
 scripts/        One-off scripts (seed the single owner)
@@ -121,6 +121,38 @@ active list filters. All endpoints require a valid session and use the shared `{
 envelope with `400`/`401`/`404` as appropriate. See
 [specs/003-dsa-tracker/contracts/dsa-api.md](specs/003-dsa-tracker/contracts/dsa-api.md).
 
+## Weekly Review feature
+
+The **Weekly Review** captures one structured retrospective per week over the 26-week prep. A week is
+identified by its **week number (1–26)**; the app derives that week's **Monday–Sunday (UTC)** date
+range from a documented `PREP_START_DATE` anchor, and uses that range for prefill. **One review per
+week** is enforced by a unique index on `weekNumber` (duplicate create → `409`). There is no delete.
+
+Each review captures: planned vs. actually-completed work, total study hours, problems solved, an
+optional self-assessed DSA success rate (0–100), weak topics (list), wins, and next-week adjustments.
+The list is newest-week first and surfaces each week's weak topics and wins as a trend.
+
+**Prefill** (`GET /api/weekly-review/prefill?weekNumber=N`) suggests the week's study hours (summed
+from Daily Log entries in range) and problems solved (counted from DSA entries in range), plus
+suggested weak topics (reusing the DSA weak-topic rule). It is **suggestion-only and read-only** — it
+never creates or overwrites a review, and confirmed totals are stored as a **snapshot** that does not
+change when the underlying Daily Log/DSA data later changes. A true DSA success rate is not derivable
+from stored data (only solved problems are recorded), so prefill returns it as `null` with a note.
+
+### Endpoints (`app/api/weekly-review`)
+
+| Method & path                     | Purpose                                          | Success |
+| --------------------------------- | ------------------------------------------------ | ------- |
+| `POST /api/weekly-review`         | Create a review for a week                       | `201`   |
+| `GET /api/weekly-review`          | List reviews newest-week first (paginated)       | `200`   |
+| `GET /api/weekly-review/:id`      | Fetch a single review                            | `200`   |
+| `PATCH /api/weekly-review/:id`    | Update a review in place (week identity immutable) | `200` |
+| `GET /api/weekly-review/prefill`  | Suggested totals for a week (read-only)          | `200`   |
+
+All endpoints require a valid session and use the shared `{ data }` / `{ error }` envelope; a
+duplicate week returns `409 DUPLICATE_WEEK`. See
+[specs/004-weekly-review/contracts/weekly-review-api.md](specs/004-weekly-review/contracts/weekly-review-api.md).
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel.
@@ -132,6 +164,7 @@ envelope with `400`/`401`/`404` as appropriate. See
 ## Validation
 
 See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md),
-[specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md), and
-[specs/003-dsa-tracker/quickstart.md](specs/003-dsa-tracker/quickstart.md) for end-to-end
+[specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md),
+[specs/003-dsa-tracker/quickstart.md](specs/003-dsa-tracker/quickstart.md), and
+[specs/004-weekly-review/quickstart.md](specs/004-weekly-review/quickstart.md) for end-to-end
 validation scenarios mapped to each feature's acceptance criteria.

@@ -122,3 +122,54 @@ export interface DsaSummaryDTO {
   countsByDifficulty: { easy: number; medium: number; hard: number };
   weakTopics: { topic: string; averageConfidence: number; needsRevisionCount: number }[];
 }
+
+// --- Weekly review ----------------------------------------------------------
+
+/** Serialized Weekly Review returned by the API (dates as ISO strings). */
+export interface WeeklyReviewDTO {
+  id: string;
+  weekNumber: number;
+  weekStartDate: string;
+  weekEndDate: string;
+  plannedWork: string;
+  completedWork: string;
+  totalStudyHours: number;
+  problemsSolved: number;
+  dsaAccuracyPercent?: number;
+  weakTopics: string[];
+  wins: string;
+  nextWeekAdjustments: string;
+  prefillSourceUsed?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Payload accepted when creating a Weekly Review (dates derived from weekNumber). */
+export interface CreateWeeklyReviewInput {
+  weekNumber: number;
+  plannedWork: string;
+  completedWork: string;
+  totalStudyHours: number;
+  problemsSolved: number;
+  dsaAccuracyPercent?: number;
+  weakTopics: string[];
+  wins: string;
+  nextWeekAdjustments: string;
+  prefillSourceUsed?: boolean;
+}
+
+/** Payload accepted when editing a Weekly Review (week identity is immutable). */
+export type UpdateWeeklyReviewInput = Partial<Omit<CreateWeeklyReviewInput, 'weekNumber'>>;
+
+/** Suggested totals for a week, derived from Daily Log + DSA data (never stored). */
+export interface WeeklyPrefillDTO {
+  weekNumber: number;
+  weekStartDate: string;
+  weekEndDate: string;
+  suggestedTotalStudyHours: number;
+  suggestedDsaSolvedCount: number;
+  suggestedDsaAttemptCount: number;
+  suggestedDsaAccuracyPercent: number | null;
+  suggestedWeakTopics: string[];
+  coverage: { dailyLogCount: number; dsaCount: number; hasData: boolean; notes: string[] };
+}
