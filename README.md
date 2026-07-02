@@ -153,6 +153,35 @@ All endpoints require a valid session and use the shared `{ data }` / `{ error }
 duplicate week returns `409 DUPLICATE_WEEK`. See
 [specs/004-weekly-review/contracts/weekly-review-api.md](specs/004-weekly-review/contracts/weekly-review-api.md).
 
+## Dashboard feature
+
+The **Dashboard** is the authenticated home screen (`/dashboard`, where sign-in and the app root
+land). It is a **read-only aggregate** — no new collection — recomputed on every load from the Daily
+Log, DSA, and Weekly Review data, so it never shows stale values.
+
+It shows: overall completion %, current week (1–26), total study hours vs the 936-hour target with a
+progress bar, the current study streak, all-time and this-week DSA problems solved, this week's goals
+(from the current week's Weekly Review), and quick links to the three trackers.
+
+**Formulas** (centralized in `lib/dashboard.ts`, pure and unit-tested):
+
+- **Completion %** = `round(currentWeek / 26 * 100)`, clamped 0–100 (elapsed program time).
+- **Current week** = today mapped to the canonical Monday–Sunday UTC week from `PREP_START_DATE`
+  (shared with Weekly Review), clamped 1–26.
+- **Hours %** = `min(100, round(totalStudyHours / 936 * 100))`; the raw total is preserved.
+- **Streak** = consecutive UTC days with a daily log where `studyHours > 0`, ending **today or
+  yesterday**; `0` otherwise. A zero-hours day breaks the streak.
+
+### Endpoint (`app/api/dashboard`)
+
+| Method & path                 | Purpose                                   | Success |
+| ----------------------------- | ----------------------------------------- | ------- |
+| `GET /api/dashboard/summary`  | All dashboard metrics in one response      | `200`   |
+
+The endpoint is session-guarded, read-only, and returns zeros/empty (`weeklyGoalsStatus: 'not_set'`)
+for an empty dataset without error. See
+[specs/005-dashboard/contracts/dashboard-api.md](specs/005-dashboard/contracts/dashboard-api.md).
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel.
@@ -166,5 +195,6 @@ duplicate week returns `409 DUPLICATE_WEEK`. See
 See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md),
 [specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md),
 [specs/003-dsa-tracker/quickstart.md](specs/003-dsa-tracker/quickstart.md), and
-[specs/004-weekly-review/quickstart.md](specs/004-weekly-review/quickstart.md) for end-to-end
+[specs/004-weekly-review/quickstart.md](specs/004-weekly-review/quickstart.md), and
+[specs/005-dashboard/quickstart.md](specs/005-dashboard/quickstart.md) for end-to-end
 validation scenarios mapped to each feature's acceptance criteria.

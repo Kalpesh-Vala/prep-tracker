@@ -65,3 +65,8 @@ export const WEEKLY_REVIEW_TOPIC_MAX_LEN = 100;
 /** Default and maximum page size for the Weekly Review list. */
 export const WEEKLY_REVIEW_DEFAULT_LIMIT = 26;
 export const WEEKLY_REVIEW_MAX_LIMIT = 100;
+
+// --- Dashboard --------------------------------------------------------------
+
+/** Target total study hours across the 26-week program (26 × 36). */
+export const STUDY_HOURS_TARGET = 936;
