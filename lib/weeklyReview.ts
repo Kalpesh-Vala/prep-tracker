@@ -55,6 +55,14 @@ export function weekRange(weekNumber: number): { start: Date; end: Date } {
   return { start, end };
 }
 
+/** Current program week number for a given date, clamped to 1..PREP_TOTAL_WEEKS. */
+export function currentWeekNumber(now: Date = new Date()): number {
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const diffDays = Math.floor((todayUTC - prepStartUTC().getTime()) / DAY_MS);
+  const week = Math.floor(diffDays / 7) + 1;
+  return Math.min(PREP_TOTAL_WEEKS, Math.max(1, week));
+}
+
 function normalizeTopics(topics: string[] | undefined): string[] {
   return (topics ?? []).map((t) => t.trim()).filter((t) => t.length > 0);
 }

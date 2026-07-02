@@ -173,3 +173,21 @@ export interface WeeklyPrefillDTO {
   suggestedWeakTopics: string[];
   coverage: { dailyLogCount: number; dsaCount: number; hasData: boolean; notes: string[] };
 }
+
+// --- Dashboard --------------------------------------------------------------
+
+/** Read-only aggregate shown on the Dashboard home screen (computed on demand). */
+export interface DashboardSummaryDTO {
+  currentWeek: number;
+  totalWeeks: number;
+  completionPercentage: number;
+  totalHoursLogged: number;
+  targetHours: number;
+  hoursProgressPercentage: number;
+  currentStreakDays: number;
+  dsaTotalSolved: number;
+  dsaSolvedThisWeek: number;
+  weeklyGoals: string | null;
+  weeklyGoalsStatus: 'set' | 'not_set';
+  lastUpdated: string;
+}
