@@ -45,3 +45,23 @@ export const DSA_MAX_LIMIT = 100;
 
 /** How many weakest topics the summary surfaces. */
 export const WEAK_TOPICS_COUNT = 5;
+
+// --- Weekly review ----------------------------------------------------------
+
+/**
+ * Fixed prep start date (a Monday) anchoring week 1. Week N spans
+ * [PREP_START_DATE + (N-1)*7d, +6d] in UTC (Monday–Sunday). Documented config;
+ * change here to re-anchor the 26-week cycle.
+ */
+export const PREP_START_DATE = '2026-01-05';
+
+/** Total number of weeks in the preparation cycle. */
+export const PREP_TOTAL_WEEKS = 26;
+
+/** Maximum lengths for Weekly Review text fields. */
+export const WEEKLY_REVIEW_TEXT_MAX_LEN = 4000;
+export const WEEKLY_REVIEW_TOPIC_MAX_LEN = 100;
+
+/** Default and maximum page size for the Weekly Review list. */
+export const WEEKLY_REVIEW_DEFAULT_LIMIT = 26;
+export const WEEKLY_REVIEW_MAX_LIMIT = 100;
