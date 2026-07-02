@@ -54,3 +54,71 @@ export interface CreateDailyLogInput {
 export type UpdateDailyLogInput = Partial<Omit<CreateDailyLogInput, 'date'>> & {
   energyLevel?: EnergyLevel | null;
 };
+
+// --- DSA tracker ------------------------------------------------------------
+
+/** Difficulty of a DSA problem. */
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+/** Whether a problem was a first attempt or a revisit. */
+export type AttemptType = 'first_attempt' | 'revisit';
+
+/** Serialized DSA problem returned by the API (dates as ISO strings). */
+export interface DsaProblemDTO {
+  id: string;
+  title: string;
+  topic: string;
+  subtopic?: string;
+  difficulty: Difficulty;
+  platform: string;
+  timeTakenMinutes: number;
+  attemptType: AttemptType;
+  solvedWithoutHints: boolean;
+  timeComplexity: string;
+  spaceComplexity: string;
+  confidence: number;
+  needsRevision: boolean;
+  interviewWorthy: boolean;
+  solvedOn: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Payload accepted when creating a DSA problem (solvedOn defaults to today). */
+export interface CreateDsaInput {
+  title: string;
+  topic: string;
+  subtopic?: string;
+  difficulty: Difficulty;
+  platform: string;
+  timeTakenMinutes: number;
+  attemptType: AttemptType;
+  solvedWithoutHints: boolean;
+  timeComplexity: string;
+  spaceComplexity: string;
+  confidence: number;
+  needsRevision: boolean;
+  interviewWorthy: boolean;
+  solvedOn?: string;
+}
+
+/** Payload accepted when editing a DSA problem. */
+export type UpdateDsaInput = Partial<CreateDsaInput>;
+
+/** Filters/pagination accepted by the DSA list endpoint. */
+export interface DsaFilter {
+  topic?: string;
+  difficulty?: Difficulty;
+  needsRevision?: boolean;
+  interviewWorthy?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+/** Insights returned by the DSA summary endpoint (computed over all records). */
+export interface DsaSummaryDTO {
+  totalSolved: number;
+  countsByTopic: { topic: string; count: number }[];
+  countsByDifficulty: { easy: number; medium: number; hard: number };
+  weakTopics: { topic: string; averageConfidence: number; needsRevisionCount: number }[];
+}

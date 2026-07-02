@@ -27,7 +27,7 @@ app/            Routes + API route handlers (app/api/auth/*)
   signin/       Public sign-in page
 components/     Reusable UI (AppShell, Sidebar, SignInForm)
 lib/            Shared logic (db connection, auth, rate limiting, env, http helpers)
-models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog)
+models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog, DsaProblem)
 types/          Shared TypeScript types
 middleware.ts   Edge cookie-presence redirect for protected pages
 scripts/        One-off scripts (seed the single owner)
@@ -92,6 +92,35 @@ Server-side validation rejects invalid input with `400`; a duplicate date return
 `409 DUPLICATE_DATE`. See
 [specs/002-daily-log/contracts/daily-log-api.md](specs/002-daily-log/contracts/daily-log-api.md).
 
+## DSA Tracker feature
+
+The **DSA Tracker** logs every practiced data-structures-and-algorithms problem. Each entry is
+an independent **practice record** (the same title may recur as first attempt + revisits), and
+counts are over records.
+
+Each record captures: title, topic (+ optional subtopic), difficulty (`easy`/`medium`/`hard`),
+platform, time taken (whole minutes > 0), attempt type (`first_attempt`/`revisit`),
+solved-without-hints, time/space complexity, confidence (1–5), needs-revision, interview-worthy,
+and a solved-on date (defaults to today, past allowed, future rejected). Topics are normalized
+(trimmed, case-insensitive) for consistent grouping and filtering.
+
+### Endpoints (`app/api/dsa`)
+
+| Method & path            | Purpose                                             | Success |
+| ------------------------ | --------------------------------------------------- | ------- |
+| `POST /api/dsa`          | Create a problem record                             | `201`   |
+| `GET /api/dsa`           | List newest-first; filter by topic/difficulty/needsRevision/interviewWorthy; paginated | `200` |
+| `GET /api/dsa/:id`       | Fetch a single record                               | `200`   |
+| `PATCH /api/dsa/:id`     | Update a record in place                            | `200`   |
+| `DELETE /api/dsa/:id`    | Permanently delete a record (UI-confirmed)          | `200`   |
+| `GET /api/dsa/summary`   | Global insights: total, per-topic & per-difficulty counts, weak topics | `200` |
+
+**Weak-topic logic**: topics are ranked by lowest average confidence first, ties broken by higher
+needs-revision count, then alphabetically by topic — computed over **all** records regardless of
+active list filters. All endpoints require a valid session and use the shared `{ data }` / `{ error }`
+envelope with `400`/`401`/`404` as appropriate. See
+[specs/003-dsa-tracker/contracts/dsa-api.md](specs/003-dsa-tracker/contracts/dsa-api.md).
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel.
@@ -102,6 +131,7 @@ Server-side validation rejects invalid input with `400`; a duplicate date return
 
 ## Validation
 
-See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md)
-and [specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md) for end-to-end
+See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md),
+[specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md), and
+[specs/003-dsa-tracker/quickstart.md](specs/003-dsa-tracker/quickstart.md) for end-to-end
 validation scenarios mapped to each feature's acceptance criteria.
