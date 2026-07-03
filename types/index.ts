@@ -191,3 +191,67 @@ export interface DashboardSummaryDTO {
   weeklyGoalsStatus: 'set' | 'not_set';
   lastUpdated: string;
 }
+
+// --- CS fundamentals --------------------------------------------------------
+
+/** CS theory domain. */
+export type CsDomain = 'DBMS' | 'OS' | 'NETWORKS' | 'OOP';
+
+/** Concept maturity stage (ordered path). */
+export type CsStage = 'learned' | 'revised' | 'can_explain' | 'interview_ready';
+
+/** Serialized CS concept returned by the API (dates as ISO strings). */
+export interface CsConceptDTO {
+  id: string;
+  domain: CsDomain;
+  title: string;
+  subtopic?: string;
+  tags: string[];
+  stage: CsStage;
+  confidence: number;
+  lastRevisedAt: string;
+  notes?: string;
+  interviewQuestionRefs: string[];
+  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Payload accepted when creating a CS concept. */
+export interface CreateCsConceptInput {
+  domain: CsDomain;
+  title: string;
+  subtopic?: string;
+  tags?: string[];
+  stage: CsStage;
+  confidence: number;
+  lastRevisedAt?: string;
+  notes?: string;
+  interviewQuestionRefs?: string[];
+}
+
+/** Payload accepted when editing a CS concept. */
+export type UpdateCsConceptInput = Partial<CreateCsConceptInput>;
+
+/** Filters/pagination accepted by the CS concept list endpoint. */
+export interface CsFilter {
+  domain?: CsDomain;
+  stage?: CsStage;
+  confidenceMin?: number;
+  confidenceMax?: number;
+  interviewReady?: boolean;
+  notInterviewReady?: boolean;
+  weakOnly?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+/** Insights returned by the CS summary endpoint (over non-archived concepts). */
+export interface CsSummaryDTO {
+  totalConcepts: number;
+  countsByDomain: Record<CsDomain, number>;
+  countsByStage: Record<CsStage, number>;
+  interviewReadyPercentageOverall: number;
+  interviewReadyPercentageByDomain: Record<CsDomain, number>;
+  weakConcepts: CsConceptDTO[];
+}

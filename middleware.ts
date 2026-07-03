@@ -18,5 +18,12 @@ export function middleware(req: NextRequest) {
 
 // Protect app pages only. /signin, /api, and static assets stay public.
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/daily-log/:path*', '/dsa/:path*', '/weekly-review/:path*'],
+  matcher: [
+    '/',
+    '/dashboard/:path*',
+    '/daily-log/:path*',
+    '/dsa/:path*',
+    '/weekly-review/:path*',
+    '/cs-fundamentals/:path*',
+  ],
 };

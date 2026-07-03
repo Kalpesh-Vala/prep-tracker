@@ -70,3 +70,27 @@ export const WEEKLY_REVIEW_MAX_LIMIT = 100;
 
 /** Target total study hours across the 26-week program (26 × 36). */
 export const STUDY_HOURS_TARGET = 936;
+
+// --- CS fundamentals --------------------------------------------------------
+
+/** Allowed CS theory domains. */
+export const CS_DOMAINS = ['DBMS', 'OS', 'NETWORKS', 'OOP'] as const;
+
+/** Maturity stages (ordered path). */
+export const CS_STAGES = ['learned', 'revised', 'can_explain', 'interview_ready'] as const;
+
+/** A concept not revised within this many days is stale (weak-concepts rule). */
+export const CS_STALE_DAYS = 14;
+
+/** Weight making confidence the dominant weak-score factor (1 point ≈ 30 days stale). */
+export const CS_WEAK_CONFIDENCE_WEIGHT = 30;
+
+/** Maximum lengths for CS free-text fields. */
+export const CS_TITLE_MAX_LEN = 200;
+export const CS_TAG_MAX_LEN = 60;
+export const CS_REF_MAX_LEN = 500;
+export const CS_NOTES_MAX_LEN = 4000;
+
+/** Default and maximum page size for the CS concept list. */
+export const CS_DEFAULT_LIMIT = 20;
+export const CS_MAX_LIMIT = 100;

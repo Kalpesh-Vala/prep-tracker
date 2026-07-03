@@ -9,6 +9,7 @@ export const NAV_ITEMS = [
   { label: 'Daily Log', href: '/daily-log' },
   { label: 'DSA', href: '/dsa' },
   { label: 'Weekly Review', href: '/weekly-review' },
+  { label: 'CS Fundamentals', href: '/cs-fundamentals' },
 ] as const;
 
 export function Sidebar({ user }: Readonly<{ user: SessionUser }>) {

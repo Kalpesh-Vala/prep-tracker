@@ -27,7 +27,7 @@ app/            Routes + API route handlers (app/api/auth/*)
   signin/       Public sign-in page
 components/     Reusable UI (AppShell, Sidebar, SignInForm)
 lib/            Shared logic (db connection, auth, rate limiting, env, http helpers)
-models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog, DsaProblem, WeeklyReview)
+models/         Mongoose schemas (User, Session, LoginAttempt, DailyLog, DsaProblem, WeeklyReview, CsFundamentalConcept)
 types/          Shared TypeScript types
 middleware.ts   Edge cookie-presence redirect for protected pages
 scripts/        One-off scripts (seed the single owner)
@@ -182,6 +182,41 @@ The endpoint is session-guarded, read-only, and returns zeros/empty (`weeklyGoal
 for an empty dataset without error. See
 [specs/005-dashboard/contracts/dashboard-api.md](specs/005-dashboard/contracts/dashboard-api.md).
 
+## CS Fundamentals feature
+
+The **CS Fundamentals** tracker (`/cs-fundamentals`) tracks core theory concepts across four
+domains — **DBMS**, **OS**, **NETWORKS**, and **OOP** — through a maturity lifecycle:
+`learned` → `revised` → `can_explain` → `interview_ready`. Each concept also carries a 1–5
+confidence score, a last-revised date, tags, notes, and interview-question references.
+
+A concept is uniquely identified by its `(domain, title, subtopic)` — the same title under a
+different subtopic is allowed, but a duplicate returns `409` so you update the existing record
+instead of creating a copy. Deleting is a **soft archive**: archived concepts drop out of lists
+and the summary but their history is retained.
+
+**Weak-concept rule** (backed by `lib/csFundamentals.ts`, pure and unit-tested): a concept is
+*weak* when `confidence <= 2` **or** it is stale (`> 14` days since last revised). Weak concepts
+are ranked by a weakness score of `(5 - confidence) * 30 + daysSinceLastRevised`, so the least
+confident and most-neglected concepts surface first.
+
+The summary reports total concepts, counts by domain and stage, overall and per-domain
+interview-ready percentages (rounded to whole numbers), and the ranked list of weak concepts.
+
+### Endpoints (`app/api/cs-fundamentals`)
+
+| Method & path                          | Purpose                                  | Success |
+| -------------------------------------- | ---------------------------------------- | ------- |
+| `POST /api/cs-fundamentals`            | Create a concept (`409` on duplicate)    | `201`   |
+| `GET /api/cs-fundamentals`             | List non-archived concepts with filters  | `200`   |
+| `GET /api/cs-fundamentals/:id`         | Fetch a single concept                   | `200`   |
+| `PATCH /api/cs-fundamentals/:id`       | Update a concept (`409` on rename clash) | `200`   |
+| `DELETE /api/cs-fundamentals/:id`      | Archive (soft-delete) a concept          | `200`   |
+| `GET /api/cs-fundamentals/summary`     | Readiness insights over active concepts  | `200`   |
+
+All endpoints are session-guarded. Filters include `domain`, `stage`, confidence band
+(`confidenceMin`/`confidenceMax`), `notInterviewReady`, and `weakOnly`. See
+[specs/006-cs-fundamentals/contracts/cs-fundamentals-api.md](specs/006-cs-fundamentals/contracts/cs-fundamentals-api.md).
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel.
@@ -195,6 +230,7 @@ for an empty dataset without error. See
 See [specs/001-foundation-shell/quickstart.md](specs/001-foundation-shell/quickstart.md),
 [specs/002-daily-log/quickstart.md](specs/002-daily-log/quickstart.md),
 [specs/003-dsa-tracker/quickstart.md](specs/003-dsa-tracker/quickstart.md), and
-[specs/004-weekly-review/quickstart.md](specs/004-weekly-review/quickstart.md), and
-[specs/005-dashboard/quickstart.md](specs/005-dashboard/quickstart.md) for end-to-end
+[specs/004-weekly-review/quickstart.md](specs/004-weekly-review/quickstart.md),
+[specs/005-dashboard/quickstart.md](specs/005-dashboard/quickstart.md), and
+[specs/006-cs-fundamentals/quickstart.md](specs/006-cs-fundamentals/quickstart.md) for end-to-end
 validation scenarios mapped to each feature's acceptance criteria.
